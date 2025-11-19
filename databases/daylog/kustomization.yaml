@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: daylog
+resources:
+  - namespace-daylog.yaml
+  - externalsecret-database-credentials.yaml
+  - externalsecret-garmin-credentials.yaml
+  - cluster-daylog-database.yaml
+  - pgadmin/
