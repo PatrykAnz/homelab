@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: daylog-pgadmin
+  namespace: daylog
+spec:
+  type: NodePort
+  selector:
+    app: daylog-pgadmin
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30091
+    protocol: TCP
+    name: http
+
