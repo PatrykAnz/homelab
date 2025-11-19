@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daylog-pgadmin
+  namespace: daylog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: daylog-pgadmin
+  template:
+    metadata:
+      labels:
+        app: daylog-pgadmin
+    spec:
+      containers:
+      - name: daylog-pgadmin
+        image: dpage/pgadmin4:latest
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: daylog-pgadmin-credentials
+              key: PGADMIN_DEFAULT_EMAIL
+        - name: PGADMIN_DEFAULT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: daylog-pgadmin-credentials
+              key: PGADMIN_DEFAULT_PASSWORD
+        volumeMounts:
+        - name: pgadmin-data
+          mountPath: /var/lib/pgadmin
+      volumes:
+      - name: pgadmin-data
+        emptyDir: {}
+
