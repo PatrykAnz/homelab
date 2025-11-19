@@ -1,0 +1,6 @@
+secret-*.yaml
+*.env
+configs/external-secrets/clustersecretstore-azure-key-vault.yaml
+
+# Allow
+!*.example
