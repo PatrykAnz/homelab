@@ -20,6 +20,8 @@ Personal homelab setup running my home infrastructure.
   - daylog-pgadmin-password
   - garmin-email
   - garmin-password
+  - withings-client-id
+  - withings-client-secret
 - Azure Service Principal stored as `azure-creds` in `external-secrets` namespace
 
 ## Notes:
