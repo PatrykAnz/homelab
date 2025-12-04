@@ -44,4 +44,3 @@ spec:
                   name: azure-config
                   key: tenant-id
           restartPolicy: OnFailure
-
