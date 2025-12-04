@@ -4,3 +4,4 @@ resources:
   - configs/external-secrets/clustersecretstore-azure-key-vault.yaml
   - databases/daylog
   - apps/daylog
+  - argocd/application-homelab.yaml
