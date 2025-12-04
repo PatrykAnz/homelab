@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: daylog-pgadmin
   namespace: daylog
+  labels:
+    app: daylog
 spec:
   replicas: 1
   selector:
