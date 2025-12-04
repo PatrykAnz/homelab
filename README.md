@@ -4,6 +4,7 @@ Personal homelab setup running my home infrastructure.
 
 ## Stack
 
+- ArgoCD
 - CloudNativePG (PostgreSQL)
 - Azure Key Vault
 - External Secrets Operator
