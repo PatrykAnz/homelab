@@ -3,6 +3,8 @@ kind: CronJob
 metadata:
   name: daylog-withings-sync
   namespace: daylog
+  labels:
+    app: daylog
 spec:
   schedule: "0 5 * * *"
   jobTemplate:
