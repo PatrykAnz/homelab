@@ -13,36 +13,36 @@ spec:
         spec:
           serviceAccountName: daylog-automation
           containers:
-          - name: daylog-withings-sync
-            image: ghcr.io/patrykanz/daylog:latest
-            imagePullPolicy: Always
-            command:
-            - /bin/sh
-            - -c
-            - python -m backend.api.withings
-            env:
-            - name: SYNC_MODE
-              value: "last_7_days"
-            - name: KEY_VAULT_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: azure-config
-                  key: key-vault-name
-            - name: DB_HOST
-              value: daylog-database-rw.daylog.svc.cluster.local
-            - name: AZURE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: azure-creds
-                  key: ClientID
-            - name: AZURE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: azure-creds
-                  key: ClientSecret
-            - name: AZURE_TENANT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: azure-config
-                  key: tenant-id
+            - name: daylog-withings-sync
+              image: ghcr.io/patrykanz/daylog:latest
+              imagePullPolicy: Always
+              command:
+                - /bin/sh
+                - -c
+                - python -m backend.api.withings
+              env:
+                - name: SYNC_MODE
+                  value: "last_7_days"
+                - name: KEY_VAULT_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: azure-config
+                      key: key-vault-name
+                - name: DB_HOST
+                  value: daylog-database-rw.daylog.svc.cluster.local
+                - name: AZURE_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: azure-creds
+                      key: ClientID
+                - name: AZURE_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: azure-creds
+                      key: ClientSecret
+                - name: AZURE_TENANT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: azure-config
+                      key: tenant-id
           restartPolicy: OnFailure
