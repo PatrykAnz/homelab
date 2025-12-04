@@ -13,4 +13,3 @@ spec:
     nodePort: 30091
     protocol: TCP
     name: http
-
