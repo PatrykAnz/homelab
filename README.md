@@ -7,9 +7,12 @@ Personal Kubernetes homelab running on K3s.
 - **Orchestration**: Kubernetes (K3s)
 - **GitOps**: ArgoCD
 - **Database**: PostgreSQL 18 (CloudNativePG, 3-node HA)
+- **Database Admin**: pgAdmin 4
 - **Secrets**: Azure Key Vault + External Secrets Operator
 - **Networking**: Tailscale
 - **Config Management**: Kustomize
+- **Code Quality**: pre-commit (kubeconform, prettier, security checks)
+- **Application Runtime**: Python 3.12, FastAPI/uvicorn
 
 ## Prerequisites
 
