@@ -6,7 +6,7 @@ metadata:
   labels:
     app: daylog
 spec:
-  schedule: "0 4 * * *"
+  schedule: "0 2 * * *"
   jobTemplate:
     spec:
       template:
