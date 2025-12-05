@@ -4,4 +4,6 @@ namespace: daylog
 resources:
   - serviceaccount-automation.yaml
   - cronjob-garmin-sync.yaml
+  - cronjob-withings-sync.yaml
   - job-garmin-sync-annual.yaml
+  - job-withings-sync-annual.yaml

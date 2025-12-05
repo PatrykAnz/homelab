@@ -7,6 +7,10 @@ metadata:
     app: daylog
 spec:
   schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  startingDeadlineSeconds: 300
   jobTemplate:
     spec:
       template:
@@ -20,6 +24,13 @@ spec:
                 - /bin/sh
                 - -c
                 - python -m backend.api.garmin
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
               env:
                 - name: KEY_VAULT_NAME
                   valueFrom:
