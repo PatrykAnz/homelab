@@ -1,66 +1,73 @@
-# Homelab Overview
+# Homelab
 
-Personal homelab setup running my home infrastructure.
+Personal Kubernetes homelab running on K3s.
 
-## Stack
+## Tech Stack
 
-- ArgoCD
-- CloudNativePG (PostgreSQL)
-- Azure Key Vault
-- External Secrets Operator
-- Kustomize
-- Tailscale (remote access)
-- Azure Service Principal (authentication)
+- **Orchestration**: Kubernetes (K3s)
+- **GitOps**: ArgoCD
+- **Database**: PostgreSQL 18 (CloudNativePG, 3-node HA)
+- **Secrets**: Azure Key Vault + External Secrets Operator
+- **Networking**: Tailscale
+- **Config Management**: Kustomize
 
-## Prereqs
+## Prerequisites
 
-- Kubernetes cluster (K3s)
-- kubectl configured
-- Azure Key Vault with secrets:
-  - daylog-db-username
-  - daylog-db-password
-  - daylog-pgadmin-email
-  - daylog-pgadmin-password
-  - garmin-email
-  - garmin-password
-  - withings-client-id
-  - withings-client-secret
-- Azure Service Principal stored as `azure-creds` in `external-secrets` namespace
+- K3s cluster with kubectl configured
+- Tailscale for remote access
+- Azure Key Vault with these secrets:
+  - `daylog-db-username`
+  - `daylog-db-password`
+  - `daylog-pgadmin-email`
+  - `daylog-pgadmin-password`
+  - `garmin-email`
+  - `garmin-password`
+  - `withings-client-id`
+  - `withings-client-secret`
+- `azure-creds` secret in `external-secrets` namespace (Service Principal)
+- `azure-config` secret in `daylog` namespace with `key-vault-name` and `tenant-id`
+
+## Setup
+
+```bash
+# Install
+pip install -r requirements.txt
+pre-commit install
+
+# Bootstrap ArgoCD (one-time)
+kubectl apply -f argocd/application-homelab.yaml
+```
+
+ArgoCD will sync everything else automatically.
+
+## What's Running
+
+### DayLog Sync Jobs
+
+Container: `ghcr.io/patrykanz/daylog:latest`
+
+- **Garmin Sync** — Daily at 2:00 AM
+- **Withings Sync** — Daily at 2:00 AM
+
+Manual jobs available for full year syncs:
+
+- `kubectl apply -f apps/daylog/job-garmin-sync-annual.yaml`
+- `kubectl apply -f apps/daylog/job-withings-sync-annual.yaml`
+
+### Database
+
+PostgreSQL 18 via CloudNativePG (3 replicas, 1Gi storage)
 
 ## Ports
 
-### Always Available
+All services accessible via `<tailscale-ip>`:
 
-Services exposed using NodePort:
+| Service    | Port    | URL                            |
+| ---------- | ------- | ------------------------------ |
+| ArgoCD     | `30443` | `https://<tailscale-ip>:30443` |
+| pgAdmin    | `30091` | `http://<tailscale-ip>:30091`  |
+| PostgreSQL | `5432`  | `<tailscale-ip>:5432`          |
 
-- **ArgoCD HTTP** (`30080`/HTTP)
-  - GitOps UI
-  - Access: `http://<tailscale-ip>:30080`
+### Temporary
 
-- **ArgoCD HTTPS** (`30443`/HTTPS)
-  - GitOps UI (recommended)
-  - Access: `https://<tailscale-ip>:30443`
-
-- **pgAdmin** (`30091`/HTTP)
-  - PostgreSQL administration interface
-  - Access: `http://<tailscale-ip>:30091`
-
-- **PostgreSQL** (`5432`/TCP)
-  - Database connection
-  - Access: `<tailscale-ip>:5432`
-
-### Conditional Services
-
-Ports used by temporary jobs or manually started services:
-
-- **Withings OAuth Server** (`8081`/HTTP)
-  - FastAPI/uvicorn server for OAuth callback flow
-  - **Availability**: Only active when running with `SYNC_MODE=server` or manually started for initial OAuth setup
-  - Callback endpoint: `http://localhost:8081/callback`
-
-## Notes:
-
-- Secrets must exist in the right namespaces.
-- Database password is synced from Azure Key Vault.
-- CNPG creates its own internal secrets automatically.
-- This is a personal environment, not production.
+- **Withings OAuth** (`8081`) — Only when running `SYNC_MODE=server` for initial OAuth setup
