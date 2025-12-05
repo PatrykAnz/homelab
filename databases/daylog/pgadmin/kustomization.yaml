@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: daylog
 resources:
   - externalsecret-daylog-pgadmin-credentials.yaml
+  - pvc-daylog-pgadmin.yaml
   - deployment-daylog-pgadmin.yaml
   - service-daylog-pgadmin.yaml
