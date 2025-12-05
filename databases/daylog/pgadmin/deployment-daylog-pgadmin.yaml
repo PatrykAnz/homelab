@@ -21,6 +21,13 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           env:
             - name: PGADMIN_DEFAULT_EMAIL
               valueFrom:
