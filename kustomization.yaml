@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - databases/daylog
   - apps/daylog
+  - configs/argocd
   # Note: argocd/application-homelab.yaml is applied manually (bootstrap)
