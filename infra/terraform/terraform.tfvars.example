@@ -1,0 +1,5 @@
+location            = "<region>"              #TODO: Replace with the region of the resources
+resource_group_name = "<resource-group-name>"     #TODO: Replace with the name of the resource group
+tenant_id           = "<tenant-id>"             #TODO: Replace with the tenant ID of the directory in Microsoft Entra ID
+key_vault_name      = "<key-vault-name>"        #TODO: Replace with the name of the Key Vault
+subscription_id     = "<subscription-id>"      #TODO: Replace with the subscription ID of the resources
