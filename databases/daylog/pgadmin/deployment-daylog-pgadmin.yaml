@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: daylog-pgadmin
-          image: dpage/pgadmin4:latest
+          image: dpage/pgadmin4:9.0
           ports:
             - containerPort: 80
               name: http
