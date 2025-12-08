@@ -5,3 +5,12 @@ node_modules/
 
 # Allow
 !*.example
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+*.tfplan
+crash.log
+terraform.tfvars
