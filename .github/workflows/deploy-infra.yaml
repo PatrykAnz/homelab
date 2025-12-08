@@ -1,0 +1,263 @@
+name: Deploy AKS Cluster Infra
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/deploy-infra.yaml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/deploy-infra.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  TF_WORKING_DIR: infra/terraform
+  ARM_USE_OIDC: true
+  ARM_USE_AZUREAD: true
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+
+      - name: Generate Terraform Config Files
+        run: |
+          cat > terraform.tf << 'EOF'
+          terraform {
+            backend "azurerm" {}
+          }
+          EOF
+
+          cat > terraform.tfvars << EOF
+          location                        = "${{ secrets.TF_LOCATION }}"
+          resource_group_name             = "${{ secrets.AZURE_RESOURCE_GROUP }}"
+          tenant_id                       = "${{ secrets.AZURE_TENANT_ID }}"
+          subscription_id                 = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          key_vault_name                  = "${{ secrets.AZURE_KEY_VAULT_NAME }}"
+          storage_account_id              = "${{ secrets.AZURE_STORAGE_ACCOUNT }}"
+          storage_account_tier            = "Standard"
+          storage_account_replication_type = "LRS"
+          tfstate_container_name          = "${{ secrets.AZURE_TFSTATE_CONTAINER }}"
+          user_assigned_identity_name     = "${{ secrets.TF_USER_ASSIGNED_IDENTITY_NAME }}"
+          role_name                       = "Owner"
+          principal_type                  = "ServicePrincipal"
+          github_organization_target      = "${{ secrets.TF_GITHUB_ORG }}"
+          github_repository               = "${{ secrets.TF_GITHUB_REPO }}"
+          environment                     = "${{ secrets.TF_ENVIRONMENT }}"
+          EOF
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ secrets.AZURE_TFSTATE_CONTAINER }}" \
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="use_oidc=true" \
+            -backend-config="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -backend-config="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -backend-config="client_id=${{ secrets.AZURE_CLIENT_ID }}"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Run tfsec Security Scan
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
+        if: github.event_name == 'pull_request'
+        with:
+          tfsec_args: --soft-fail
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          export exitcode=0
+          terraform plan -no-color -input=false -out=tfplan || export exitcode=$?
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          if [ $exitcode -eq 1 ]; then
+            echo "Error: Terraform plan failed"
+            exit 1
+          else
+            echo "Terraform plan was successful"
+            exit 0
+          fi
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Create Plan Output
+        id: tf-plan-string
+        run: |
+          TERRAFORM_PLAN=$(terraform show -no-color tfplan)
+          delimiter="$(openssl rand -hex 8)"
+          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo '```terraform' >> $GITHUB_OUTPUT
+          echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo "</details>" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
+
+      - name: Publish Plan to Step Summary
+        env:
+          SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
+        run: echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format 🖌️ \`${{ steps.fmt.outcome }}\`
+            #### Terraform Init ⚙️ \`${{ steps.init.outcome }}\`
+            #### Terraform Validate 🤖 \`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+
+            ${process.env.SUMMARY}
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TF_WORKING_DIR }}/tfplan
+
+  terraform-apply:
+    name: Terraform Apply
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+
+      - name: Generate Terraform Config Files
+        run: |
+          cat > terraform.tf << 'EOF'
+          terraform {
+            backend "azurerm" {}
+          }
+          EOF
+
+          cat > terraform.tfvars << EOF
+          location                        = "${{ secrets.TF_LOCATION }}"
+          resource_group_name             = "${{ secrets.AZURE_RESOURCE_GROUP }}"
+          tenant_id                       = "${{ secrets.AZURE_TENANT_ID }}"
+          subscription_id                 = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          key_vault_name                  = "${{ secrets.AZURE_KEY_VAULT_NAME }}"
+          storage_account_id              = "${{ secrets.AZURE_STORAGE_ACCOUNT }}"
+          storage_account_tier            = "Standard"
+          storage_account_replication_type = "LRS"
+          tfstate_container_name          = "${{ secrets.AZURE_TFSTATE_CONTAINER }}"
+          user_assigned_identity_name     = "${{ secrets.TF_USER_ASSIGNED_IDENTITY_NAME }}"
+          role_name                       = "Owner"
+          principal_type                  = "ServicePrincipal"
+          github_organization_target      = "${{ secrets.TF_GITHUB_ORG }}"
+          github_repository               = "${{ secrets.TF_GITHUB_REPO }}"
+          environment                     = "${{ secrets.TF_ENVIRONMENT }}"
+          EOF
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ secrets.AZURE_TFSTATE_CONTAINER }}" \
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="use_oidc=true" \
+            -backend-config="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -backend-config="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -backend-config="client_id=${{ secrets.AZURE_CLIENT_ID }}"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
