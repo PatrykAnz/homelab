@@ -29,6 +29,8 @@ jobs:
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.plan.outputs.has_changes }}
     defaults:
       run:
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -113,14 +115,17 @@ jobs:
         id: plan
         run: |
           export exitcode=0
-          terraform plan -no-color -input=false -out=tfplan || export exitcode=$?
-          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          terraform plan -no-color -input=false -out=tfplan -detailed-exitcode || export exitcode=$?
+
           if [ $exitcode -eq 1 ]; then
             echo "Error: Terraform plan failed"
             exit 1
+          elif [ $exitcode -eq 2 ]; then
+            echo "Terraform plan has changes"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
           else
-            echo "Terraform plan was successful"
-            exit 0
+            echo "No changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -184,7 +189,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     needs: terraform-plan
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.terraform-plan.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     environment: dev
     defaults:
