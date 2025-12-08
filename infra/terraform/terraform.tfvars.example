@@ -1,5 +1,27 @@
-location            = "<region>"              #TODO: Replace with the region of the resources
-resource_group_name = "<resource-group-name>"     #TODO: Replace with the name of the resource group
-tenant_id           = "<tenant-id>"             #TODO: Replace with the tenant ID of the directory in Microsoft Entra ID
-key_vault_name      = "<key-vault-name>"        #TODO: Replace with the name of the Key Vault
-subscription_id     = "<subscription-id>"      #TODO: Replace with the subscription ID of the resources
+location            = "<region>"                          #TODO: Replace with the Azure region (e.g., "northeurope")
+resource_group_name = "<resource-group-name>"              #TODO: Replace with the name of the resource group
+tenant_id           = "<tenant-id>"                        #TODO: Replace with the tenant ID of the directory in Microsoft Entra ID
+subscription_id     = "<subscription-id>"                  #TODO: Replace with the subscription ID of the resources
+
+# Key Vault
+key_vault_name = "<key-vault-name>"                        #TODO: Replace with the name of the Key Vault
+
+# Storage Account
+storage_account_id               = "<storage-account-name>" #TODO: Replace with globally unique name (lowercase, no hyphens)
+storage_account_tier             = "<storage-account-tier>"               #TODO: Replace with the tier of the storage account
+storage_account_replication_type = "<storage-account-replication-type>"                    #TODO: Replace with the replication type of the storage account
+
+# TFState
+tfstate_container_name = "<container-name>"              #TODO: Replace with the container name used for tfstate
+
+# User Assigned Identity
+user_assigned_identity_name = "<user-assigned-identity-name>" #TODO: Replace with the name of the user assigned identity
+
+#Role Assignment
+role_name      = "<role-name>"                          #TODO: Replace with the name of the role to assign to the principal
+principal_type = "<principal-type>"                     #TODO: Replace with the type of the principal to assign the role to
+
+# GitHub
+github_organization_target = "<github-organization-target>" #TODO: Replace with the GitHub organization target
+github_repository          = "<github-repository>"          #TODO: Replace with the GitHub repository
+environment                = "<environment>"                #TODO: Replace with the environment
