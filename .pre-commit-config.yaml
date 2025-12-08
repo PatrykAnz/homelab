@@ -16,15 +16,34 @@ repos:
         files: \.(ya?ml|md)$
         args: [--write]
 
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.88.0
-    hooks:
-      - id: terraform_fmt
-      - id: terraform_validate
-      - id: terraform_tflint
-
   - repo: local
     hooks:
+      - id: terraform_fmt
+        name: terraform fmt
+        entry: terraform fmt -check -diff
+        language: system
+        files: \.tf$
+        exclude: \.terraform/
+        pass_filenames: false
+
+      - id: terraform_validate
+        name: terraform validate
+        entry: terraform validate
+        language: system
+        files: \.tf$
+        exclude: \.terraform/
+        pass_filenames: false
+
+      - id: tflint
+        name: tflint
+        entry: tflint --recursive
+        language: golang
+        additional_dependencies:
+          - github.com/terraform-linters/tflint@v0.54.0
+        files: \.tf$
+        exclude: \.terraform/
+        pass_filenames: false
+
       - id: kubeconform
         name: kubeconform linter
         entry: kubeconform -summary -strict -ignore-missing-schemas -skip CustomResourceDefinition
