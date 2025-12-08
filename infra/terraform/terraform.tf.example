@@ -1,0 +1,8 @@
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "<resource-group-name>"   # TODO: set to the RG that holds the tfstate storage
+    storage_account_id = "<storage-account-id>"  # TODO: globally unique, lowercase
+    container_name       = "<container-name>"       # TODO: set to the container name used for tfstate
+    key                  = "<state-key>"             # TODO: set to the key used for tfstate
+  }
+}
