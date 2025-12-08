@@ -1,0 +1,118 @@
+name: Terraform Apply
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        required: true
+        type: string
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_RESOURCE_GROUP:
+        required: true
+      AZURE_STORAGE_ACCOUNT:
+        required: true
+      AZURE_TFSTATE_CONTAINER:
+        required: true
+      AZURE_KEY_VAULT_NAME:
+        required: true
+      TF_LOCATION:
+        required: true
+      TF_USER_ASSIGNED_IDENTITY_NAME:
+        required: true
+      TF_GITHUB_ORG:
+        required: true
+      TF_GITHUB_REPO:
+        required: true
+      TF_ENVIRONMENT:
+        required: true
+
+env:
+  ARM_USE_OIDC: true
+  ARM_USE_AZUREAD: true
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+
+      - name: Generate Terraform Config Files
+        run: |
+          cat > terraform.tf << 'EOF'
+          terraform {
+            backend "azurerm" {}
+          }
+          EOF
+
+          cat > terraform.tfvars << EOF
+          location                         = "${{ secrets.TF_LOCATION }}"
+          resource_group_name              = "${{ secrets.AZURE_RESOURCE_GROUP }}"
+          tenant_id                        = "${{ secrets.AZURE_TENANT_ID }}"
+          subscription_id                  = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          key_vault_name                   = "${{ secrets.AZURE_KEY_VAULT_NAME }}"
+          storage_account_id               = "${{ secrets.AZURE_STORAGE_ACCOUNT }}"
+          storage_account_tier             = "Standard"
+          storage_account_replication_type = "LRS"
+          tfstate_container_name           = "${{ secrets.AZURE_TFSTATE_CONTAINER }}"
+          user_assigned_identity_name      = "${{ secrets.TF_USER_ASSIGNED_IDENTITY_NAME }}"
+          role_name                        = "Owner"
+          principal_type                   = "ServicePrincipal"
+          github_organization_target       = "${{ secrets.TF_GITHUB_ORG }}"
+          github_repository                = "${{ secrets.TF_GITHUB_REPO }}"
+          environment                      = "${{ secrets.TF_ENVIRONMENT }}"
+          EOF
+
+          terraform fmt terraform.tf terraform.tfvars
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ secrets.AZURE_TFSTATE_CONTAINER }}" \
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="use_oidc=true" \
+            -backend-config="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -backend-config="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -backend-config="client_id=${{ secrets.AZURE_CLIENT_ID }}"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ inputs.working_directory }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
