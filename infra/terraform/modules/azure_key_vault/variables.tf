@@ -1,31 +1,25 @@
 variable "name" {
   type        = string
-  description = "Name of the Key Vault."
+  description = "Key Vault name."
 }
 
 variable "location" {
   type        = string
-  description = "Name of the Azure region."
+  description = "Azure region."
 }
 
 variable "resource_group_name" {
   type        = string
-  description = "Name of the resource group."
+  description = "Resource group name."
 }
 
 variable "tenant_id" {
   type        = string
-  description = "Tenant ID of the directory in Microsoft Entra ID."
+  description = "Azure AD tenant ID."
 }
 
 variable "sku_name" {
   type        = string
-  description = "SKU tier of the Key Vault."
+  description = "SKU tier (standard or premium)."
   default     = "standard"
-}
-
-variable "enable_rbac_authorization" {
-  type        = bool
-  description = "Flag indicating whether RBAC authorization is enabled."
-  default     = true
 }
