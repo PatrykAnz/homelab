@@ -23,3 +23,9 @@ variable "sku_name" {
   description = "SKU tier (standard or premium)."
   default     = "standard"
 }
+
+variable "enable_rbac_authorization" {
+  type        = bool
+  description = "Enable RBAC authorization for Key Vault"
+  default     = true
+}
