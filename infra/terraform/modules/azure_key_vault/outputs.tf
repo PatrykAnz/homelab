@@ -1,9 +1,7 @@
 output "id" {
-  description = "ID of the Key Vault."
-  value       = azurerm_key_vault.kv.id
+  value = azurerm_key_vault.key_vault.id
 }
 
 output "vault_uri" {
-  description = "Vault URI for secret operations."
-  value       = azurerm_key_vault.kv.vault_uri
+  value = azurerm_key_vault.key_vault.vault_uri
 }
