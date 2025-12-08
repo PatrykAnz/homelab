@@ -75,6 +75,8 @@ jobs:
           environment                     = "${{ secrets.TF_ENVIRONMENT }}"
           EOF
 
+          terraform fmt terraform.tf terraform.tfvars
+
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check -recursive
@@ -230,6 +232,8 @@ jobs:
           github_repository               = "${{ secrets.TF_GITHUB_REPO }}"
           environment                     = "${{ secrets.TF_ENVIRONMENT }}"
           EOF
+
+          terraform fmt terraform.tf terraform.tfvars
 
       - name: Terraform Init
         run: |
