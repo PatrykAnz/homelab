@@ -15,3 +15,4 @@ node_modules/
 crash.log
 terraform.tfvars
 terraform.tf
+tfplan.json

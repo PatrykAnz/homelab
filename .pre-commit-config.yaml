@@ -51,4 +51,4 @@ repos:
         additional_dependencies:
           - github.com/yannh/kubeconform/cmd/kubeconform@v0.7.0
         files: \.ya?ml$
-        exclude: ^\.pre-commit-config\.yaml$
+        exclude: ^(\.pre-commit-config\.yaml|\.github/)
