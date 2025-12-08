@@ -20,7 +20,7 @@ repos:
     hooks:
       - id: terraform_fmt
         name: terraform fmt
-        entry: terraform fmt -check -diff
+        entry: terraform fmt -recursive -check -diff
         language: system
         files: \.tf$
         exclude: \.terraform/
