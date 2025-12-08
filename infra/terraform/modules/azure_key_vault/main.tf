@@ -1,8 +1,8 @@
 resource "azurerm_key_vault" "key_vault" {
-  name                      = var.name
-  location                  = var.location
-  resource_group_name       = var.resource_group_name
-  tenant_id                 = var.tenant_id
-  sku_name                  = var.sku_name
-  enable_rbac_authorization = var.enable_rbac_authorization
+  name                       = var.name
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  tenant_id                  = var.tenant_id
+  sku_name                   = var.sku_name
+  rbac_authorization_enabled = var.enable_rbac_authorization
 }
