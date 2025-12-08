@@ -68,6 +68,6 @@ module "tfstate_role_assignment" {
   source         = "./modules/azure_role_assignment"
   principal_id   = module.user_assigned_identity.user_assinged_identity_principal_id
   principal_type = var.principal_type
-  role_name      = var.role_name
-  scope_id       = module.storageaccount.primary_blob_endpoint
+  role_name      = "Storage Blob Data Contributor"
+  scope_id       = module.storageaccount.id
 }
