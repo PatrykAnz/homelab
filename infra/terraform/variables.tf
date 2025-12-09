@@ -77,3 +77,9 @@ variable "environment" {
   type        = string
   description = "Environment."
 }
+
+variable "external_secrets_sp_name" {
+  type        = string
+  description = "Name for the External Secrets Operator service principal."
+  default     = "homelab-external-secrets"
+}

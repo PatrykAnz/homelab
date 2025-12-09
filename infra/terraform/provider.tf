@@ -4,3 +4,8 @@ provider "azurerm" {
   tenant_id       = var.tenant_id
   use_oidc        = true
 }
+
+provider "azuread" {
+  tenant_id = var.tenant_id
+  use_oidc  = true
+}

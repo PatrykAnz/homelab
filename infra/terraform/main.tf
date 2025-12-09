@@ -2,7 +2,7 @@ locals {
   default_audience_name = "api://AzureADTokenExchange"
   github_issuer_url     = "https://token.actions.githubusercontent.com"
 }
-
+data "azurerm_client_config" "current" {}
 data "azurerm_subscription" "current" {}
 
 resource "azurerm_resource_group" "resource_group" {
@@ -70,4 +70,60 @@ module "tfstate_role_assignment" {
   principal_type = var.principal_type
   role_name      = "Storage Blob Data Contributor"
   scope_id       = module.storageaccount.id
+}
+
+# External Secrets Operator Service Principal
+module "external_secrets_sp" {
+  source = "./modules/azure_service_principal"
+  name   = var.external_secrets_sp_name
+}
+
+# Give External Secrets SP access to read Key Vault secrets
+module "external_secrets_keyvault_role" {
+  source         = "./modules/azure_role_assignment"
+  principal_id   = module.external_secrets_sp.object_id
+  principal_type = var.principal_type
+  role_name      = "Key Vault Secrets User"
+  scope_id       = module.keyvault.id
+}
+
+# Store secrets in Key Vault for External Secrets Operator
+resource "azurerm_key_vault_secret" "azure_client_id" {
+  name         = "azure-client-id"
+  value        = module.external_secrets_sp.client_id
+  key_vault_id = module.keyvault.id
+
+  depends_on = [module.keyvault_admin_role]
+}
+
+resource "azurerm_key_vault_secret" "azure_client_secret" {
+  name         = "azure-client-secret"
+  value        = module.external_secrets_sp.client_secret
+  key_vault_id = module.keyvault.id
+
+  depends_on = [module.keyvault_admin_role]
+}
+
+resource "azurerm_key_vault_secret" "azure_tenant_id" {
+  name         = "azure-tenant-id"
+  value        = var.tenant_id
+  key_vault_id = module.keyvault.id
+
+  depends_on = [module.keyvault_admin_role]
+}
+
+resource "azurerm_key_vault_secret" "azure_key_vault_name" {
+  name         = "azure-key-vault-name"
+  value        = var.key_vault_name
+  key_vault_id = module.keyvault.id
+
+  depends_on = [module.keyvault_admin_role]
+}
+
+module "keyvault_admin_role" {
+  source         = "./modules/azure_role_assignment"
+  principal_id   = data.azurerm_client_config.current.object_id
+  principal_type = var.principal_type
+  role_name      = "Key Vault Secrets Officer"
+  scope_id       = module.keyvault.id
 }
