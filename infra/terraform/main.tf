@@ -2,21 +2,9 @@ locals {
   default_audience_name = "api://AzureADTokenExchange"
   github_issuer_url     = "https://token.actions.githubusercontent.com"
 }
+
 data "azurerm_client_config" "current" {}
 data "azurerm_subscription" "current" {}
-
-# Get the Application Administrator directory role
-data "azuread_directory_role_templates" "all" {}
-
-resource "azuread_directory_role" "application_administrator" {
-  template_id = one([for role in data.azuread_directory_role_templates.all.role_templates : role.template_id if role.display_name == "Application Administrator"])
-}
-
-# Grant Application Administrator role to GitHub Actions identity
-resource "azuread_directory_role_assignment" "github_app_admin" {
-  role_id             = azuread_directory_role.application_administrator.template_id
-  principal_object_id = module.user_assigned_identity.user_assinged_identity_principal_id
-}
 
 resource "azurerm_resource_group" "resource_group" {
   name     = var.resource_group_name
