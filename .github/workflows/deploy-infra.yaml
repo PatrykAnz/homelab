@@ -44,11 +44,24 @@ jobs:
       TF_ENVIRONMENT: ${{ secrets.TF_ENVIRONMENT }}
 
   # ============================================
-  # APPLY - Only runs on main when changes exist
+  # APPROVAL - Manual gate before apply
+  # ============================================
+  approve-apply:
+    name: Approve Apply
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.terraform-plan.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Approval Gate
+        run: echo "Apply approved for production"
+
+  # ============================================
+  # APPLY - Only runs after manual approval
   # ============================================
   terraform-apply:
     name: Terraform Apply
-    needs: terraform-plan
+    needs: [terraform-plan, approve-apply]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.terraform-plan.outputs.has_changes == 'true'
     uses: ./.github/workflows/terraform-apply.yaml
     with:
