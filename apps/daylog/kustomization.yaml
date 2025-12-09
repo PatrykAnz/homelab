@@ -3,6 +3,8 @@ kind: Kustomization
 namespace: daylog
 resources:
   - serviceaccount-automation.yaml
+  - externalsecret-azure-config.yaml
+  - externalsecret-azure-creds.yaml
   - cronjob-garmin-sync.yaml
   - cronjob-withings-sync.yaml
   - job-garmin-sync-annual.yaml

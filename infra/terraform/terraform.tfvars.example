@@ -25,3 +25,6 @@ principal_type = "<principal-type>"                     #TODO: Replace with the 
 github_organization_target = "<github-organization-target>" #TODO: Replace with the GitHub organization target
 github_repository          = "<github-repository>"          #TODO: Replace with the GitHub repository
 environment                = "<environment>"                #TODO: Replace with the environment
+
+# External Secrets Operator
+external_secrets_sp_name = "<external-secrets-sp-name>"     #TODO: Replace with the name of the external secrets service principal
