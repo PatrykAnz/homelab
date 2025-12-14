@@ -1,7 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - databases/daylog
   - apps/daylog
-  - configs/argocd
-  # Note: argocd/application-homelab.yaml is applied manually (bootstrap)
+  - databases/daylog
+  - platform/argocd
+  - platform/external-secrets
+  # Note: bootstrap/application-homelab.yaml is applied manually
