@@ -2,7 +2,7 @@ secret-*.yaml
 *.env
 platform/external-secrets/clustersecretstore-azure-key-vault.yaml
 node_modules/
-
+switch.md
 # Allow
 !*.example
 
