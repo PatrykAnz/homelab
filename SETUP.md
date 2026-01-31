@@ -26,6 +26,8 @@ Required secrets in Azure Key Vault:
 | `garmin-password`         | Garmin Connect password      |
 | `withings-client-id`      | Withings API client ID       |
 | `withings-client-secret`  | Withings API client secret   |
+| `grafana-admin-user`      | Grafana admin username       |
+| `grafana-admin-password`  | Grafana admin password       |
 
 ## Bootstrap
 
@@ -35,6 +37,15 @@ Install dependencies and bootstrap ArgoCD:
 pip install -r requirements.txt
 pre-commit install
 kubectl apply -f bootstrap/application-homelab.yaml
+```
+
+## External Secrets (Azure Key Vault)
+
+Remove `.example` from file and edit values:
+platform/external-secrets/clustersecretstore-azure-key-vault.yaml.example -> platform/external-secrets/clustersecretstore-azure-key-vault.yaml
+
+```bash
+kubectl apply -f platform/external-secrets/clustersecretstore-azure-key-vault.yaml
 ```
 
 ## Terraform Setup
