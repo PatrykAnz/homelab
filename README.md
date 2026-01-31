@@ -5,11 +5,17 @@ Personal Kubernetes homelab running on K3s with GitOps.
 ## Stack
 
 **Kubernetes:** K3s
+
 **GitOps:** ArgoCD
+
 **IaC:** Terraform (Azure)
+
 **Delivery:** PR-driven workflows with OIDC
+
 **Secrets:** Azure Key Vault + External Secrets Operator
+
 **Networking:** Tailscale
+
 **Database:** PostgreSQL 18 (CloudNativePG, 3-node HA)
 **Home Automation:** Mosquitto, Zigbee2MQTT, Home Assistant (Docker on host)
 
