@@ -5,4 +5,4 @@ resources:
   - databases/daylog
   - platform/argocd
   - platform/external-secrets
-  # Note: bootstrap/application-homelab.yaml is applied manually
+  - platform/kube-prometheus-stack
