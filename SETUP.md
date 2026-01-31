@@ -26,6 +26,8 @@ Required secrets in Azure Key Vault:
 | `garmin-password`         | Garmin Connect password      |
 | `withings-client-id`      | Withings API client ID       |
 | `withings-client-secret`  | Withings API client secret   |
+| `grafana-admin-user`      | Grafana admin username       |
+| `grafana-admin-password`  | Grafana admin password       |
 
 ## Bootstrap
 
