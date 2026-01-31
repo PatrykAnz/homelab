@@ -1,0 +1,50 @@
+name: home-automation
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1884:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./passwd:/mosquitto/config/passwd:ro
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt:2
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Europe/Warsaw
+      - ZIGBEE2MQTT_DATA=/app/data
+      - ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883
+      - ZIGBEE2MQTT_CONFIG_MQTT_USER=${MQTT_USER}
+      - ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD=${MQTT_PASSWORD}
+      - ZIGBEE2MQTT_CONFIG_SERIAL_PORT=${ZIGBEE_DEVICE}
+    devices:
+      - "${ZIGBEE_DEVICE}:${ZIGBEE_DEVICE}"
+    volumes:
+      - zigbee2mqtt_data:/app/data
+      - /run/udev:/run/udev:ro
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:2026.1.3
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    network_mode: host
+    environment:
+      - TZ=Europe/Warsaw
+    volumes:
+      - homeassistant_config:/config
+      - /run/dbus:/run/dbus:ro
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  zigbee2mqtt_data:
+  homeassistant_config:

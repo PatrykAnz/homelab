@@ -1,5 +1,6 @@
 secret-*.yaml
 *.env
+passwd
 platform/external-secrets/clustersecretstore-azure-key-vault.yaml
 node_modules/
 # Allow
