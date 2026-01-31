@@ -37,6 +37,15 @@ pre-commit install
 kubectl apply -f bootstrap/application-homelab.yaml
 ```
 
+## External Secrets (Azure Key Vault)
+
+Remove `.example` from file and edit values:
+platform/external-secrets/clustersecretstore-azure-key-vault.yaml.example -> platform/external-secrets/clustersecretstore-azure-key-vault.yaml
+
+```bash
+kubectl apply -f platform/external-secrets/clustersecretstore-azure-key-vault.yaml
+```
+
 ## Terraform Setup
 
 Remove .example from files and edit values:
