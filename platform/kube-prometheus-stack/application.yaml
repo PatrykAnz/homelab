@@ -10,7 +10,7 @@ spec:
     targetRevision: 81.2.2
     chart: kube-prometheus-stack
     helm:
-      skipCrds: true
+      skipCrds: false
       values: |
         prometheus-node-exporter:
           enabled: true
