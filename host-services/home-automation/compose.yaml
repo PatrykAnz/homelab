@@ -37,7 +37,6 @@ services:
     depends_on:
       - mosquitto
     network_mode: host
-    privileged: true
     environment:
       - TZ=Europe/Warsaw
     volumes:
