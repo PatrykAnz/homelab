@@ -15,19 +15,18 @@ spec:
       labels:
         app: daylog-pgadmin
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: daylog-pgadmin
           image: dpage/pgadmin4:9.0
-          ports:
-            - containerPort: 80
-              name: http
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
+          imagePullPolicy: IfNotPresent
+
           env:
             - name: PGADMIN_DEFAULT_EMAIL
               valueFrom:
@@ -39,6 +38,27 @@ spec:
                 secretKeyRef:
                   name: daylog-pgadmin-credentials
                   key: PGADMIN_DEFAULT_PASSWORD
+            - name: PGADMIN_LISTEN_PORT
+              value: "8080"
+
+          ports:
+            - containerPort: 8080
+              name: http
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+
           volumeMounts:
             - name: pgadmin-data
               mountPath: /var/lib/pgadmin
