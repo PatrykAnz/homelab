@@ -107,9 +107,10 @@ module "tfstate_role_assignment" {
 module "keyvault_admin_role" {
   source = "./modules/azure_role_assignment"
 
-  scope        = module.keyvault.id
-  role_name    = "Key Vault Secrets Officer"
-  principal_id = data.azurerm_client_config.current.object_id
+  scope          = module.keyvault.id
+  role_name      = "Key Vault Secrets Officer"
+  principal_id   = data.azurerm_client_config.current.object_id
+  principal_type = null
 }
 
 module "external_secrets_keyvault_role" {

@@ -68,4 +68,10 @@ spec:
                 capabilities:
                   drop: ["ALL"]
                 readOnlyRootFilesystem: true
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
           restartPolicy: OnFailure
