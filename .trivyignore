@@ -21,3 +21,7 @@ AVD-AZU-0013
 
 #Purge protection
 AVD-AZU-0016
+
+#pgAdmin requires UID 5050
+AVD-KSV-0020
+AVD-KSV-0021
