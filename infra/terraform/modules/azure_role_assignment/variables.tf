@@ -1,19 +1,25 @@
-variable "principal_id" {
-  description = "The ID of the principal to assign the role to."
+variable "scope" {
   type        = string
-}
-
-variable "principal_type" {
-  description = "The type of the principal to assign the role to."
-  type        = string
+  description = "Assignment scope."
 }
 
 variable "role_name" {
-  description = "The name of the role to assign to the principal."
   type        = string
+  description = "Role definition name."
 }
 
-variable "scope_id" {
-  description = "The ID of the scope to assign the role to."
+variable "principal_id" {
   type        = string
+  description = "Principal object ID."
+}
+
+variable "principal_type" {
+  type        = string
+  description = "User, Group, or SP."
+  default     = "ServicePrincipal"
+
+  validation {
+    condition     = contains(["User", "Group", "ServicePrincipal"], var.principal_type)
+    error_message = "Must be User, Group, or ServicePrincipal."
+  }
 }

@@ -11,8 +11,8 @@ resource "time_rotating" "sp_password_rotation" {
 }
 
 resource "azuread_service_principal_password" "sp_password" {
-  service_principal_id = azuread_service_principal.sp.id
   display_name         = "${var.name}-secret"
+  service_principal_id = azuread_service_principal.sp.id
   end_date             = timeadd(time_rotating.sp_password_rotation.rotation_rfc3339, "${var.password_rotation_days * 24}h")
 
   rotate_when_changed = {

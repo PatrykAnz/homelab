@@ -1,20 +1,20 @@
 output "client_id" {
   value       = azuread_application.app.client_id
-  description = "The Application (client) ID."
+  description = "Application client ID."
 }
 
 output "client_secret" {
   value       = azuread_service_principal_password.sp_password.value
-  description = "The client secret value."
+  description = "Service principal secret."
   sensitive   = true
 }
 
 output "object_id" {
   value       = azuread_service_principal.sp.object_id
-  description = "The Object ID of the service principal."
+  description = "Service principal ID."
 }
 
 output "application_id" {
   value       = azuread_application.app.id
-  description = "The Application Object ID."
+  description = "Application object ID."
 }

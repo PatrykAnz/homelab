@@ -1,29 +1,30 @@
 variable "name" {
-  description = "The name of the federated identity credential."
   type        = string
+  description = "Credential name."
 }
 
 variable "resource_group_name" {
-  description = "The name of the resource group."
   type        = string
+  description = "Resource group name."
 }
 
-variable "audience_name" {
-  description = "The name of the audience."
+variable "parent_id" {
   type        = string
+  description = "Managed identity ID."
 }
 
-variable "issuer_url" {
-  description = "The URL of the issuer."
+variable "issuer" {
   type        = string
-}
-
-variable "user_assigned_identity_id" {
-  description = "The ID of the user assigned identity."
-  type        = string
+  description = "Token issuer URL."
 }
 
 variable "subject" {
-  description = "The subject of the federated identity credential."
   type        = string
+  description = "Subject claim."
+}
+
+variable "audience" {
+  type        = string
+  description = "Token audience."
+  default     = "api://AzureADTokenExchange"
 }
