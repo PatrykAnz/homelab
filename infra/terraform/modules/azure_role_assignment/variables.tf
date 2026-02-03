@@ -19,7 +19,7 @@ variable "principal_type" {
   default     = "ServicePrincipal"
 
   validation {
-    condition     = var.principal_type == null || contains(["User", "Group", "ServicePrincipal"], var.principal_type)
+    condition     = var.principal_type == null ? true : contains(["User", "Group", "ServicePrincipal"], var.principal_type)
     error_message = "Must be User, Group, ServicePrincipal, or null."
   }
 }
