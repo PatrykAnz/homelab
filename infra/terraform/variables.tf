@@ -1,3 +1,8 @@
+variable "environment" {
+  type        = string
+  description = "Environment name."
+}
+
 variable "location" {
   type        = string
   description = "Azure region."
@@ -10,7 +15,7 @@ variable "resource_group_name" {
 
 variable "tenant_id" {
   type        = string
-  description = "Azure AD tenant ID."
+  description = "Entra ID tenant."
   sensitive   = true
 }
 
@@ -32,24 +37,24 @@ variable "storage_account_id" {
 
 variable "storage_account_tier" {
   type        = string
-  description = "Storage account tier."
+  description = "Standard or Premium."
   default     = "Standard"
 }
 
 variable "storage_account_replication_type" {
   type        = string
-  description = "Storage replication type."
+  description = "LRS, GRS, ZRS, etc."
   default     = "LRS"
 }
 
 variable "tfstate_container_name" {
   type        = string
-  description = "TFState container name."
+  description = "Terraform state container."
 }
 
 variable "user_assigned_identity_name" {
   type        = string
-  description = "User assigned identity name."
+  description = "Managed identity name."
 }
 
 variable "role_name" {
@@ -62,24 +67,18 @@ variable "principal_type" {
   description = "Principal type."
 }
 
-
 variable "github_organization_target" {
   type        = string
-  description = "GitHub organization target."
+  description = "GitHub org or username."
 }
 
 variable "github_repository" {
   type        = string
-  description = "GitHub repository."
-}
-
-variable "environment" {
-  type        = string
-  description = "Environment."
+  description = "GitHub repo name."
 }
 
 variable "external_secrets_sp_name" {
   type        = string
-  description = "Name for the External Secrets Operator service principal."
+  description = "Service principal name."
   default     = "homelab-external-secrets"
 }
