@@ -16,21 +16,21 @@ spec:
       template:
         spec:
           serviceAccountName: daylog-automation
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: daylog-garmin-sync
-              image: ghcr.io/patrykanz/daylog:latest
+              image: ghcr.io/patrykanz/daylog:main
               imagePullPolicy: Always
               command:
                 - /bin/sh
                 - -c
                 - python -m backend.api.garmin
-              resources:
-                requests:
-                  memory: "128Mi"
-                  cpu: "100m"
-                limits:
-                  memory: "512Mi"
-                  cpu: "500m"
               env:
                 - name: KEY_VAULT_NAME
                   valueFrom:
@@ -54,4 +54,16 @@ spec:
                     secretKeyRef:
                       name: azure-config
                       key: tenant-id
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                readOnlyRootFilesystem: true
           restartPolicy: OnFailure
