@@ -60,12 +60,12 @@ repos:
         files: \.ya?ml$
         exclude: ^(\.pre-commit-config\.yaml|\.github/|host-services/)
 
-      - id: tfsec
-        name: TFSec
-        entry: tfsec
+      - id: trivy
+        name: Trivy
+        entry: trivy config --exit-code 1
         language: golang
         additional_dependencies:
-          - github.com/aquasecurity/tfsec/cmd/tfsec@v1.28.11
+          - github.com/aquasecurity/trivy/cmd/trivy@v0.58.1
         files: \.tf$
         exclude: \.terraform/
         pass_filenames: false
@@ -76,4 +76,4 @@ repos:
       - id: yamllint
         args: [-c, .yamllint]
         files: \.ya?ml$
-        exclude: ^(\.pre-commit-config\.yaml|host-services/)
+        exclude: ^(\.pre-commit-config\.yaml|\.github/|host-services/)
