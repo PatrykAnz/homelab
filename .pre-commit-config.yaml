@@ -5,6 +5,7 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: check-yaml
+        args: [--allow-multiple-documents]
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: forbid-new-submodules
@@ -62,7 +63,7 @@ repos:
 
       - id: trivy
         name: Trivy
-        entry: trivy config --exit-code 1
+        entry: trivy config --exit-code 1 .
         language: golang
         additional_dependencies:
           - github.com/aquasecurity/trivy/cmd/trivy@v0.58.1
