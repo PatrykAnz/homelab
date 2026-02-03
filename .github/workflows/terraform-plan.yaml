@@ -171,9 +171,12 @@ jobs:
       - name: Post Plan to PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
+        env:
+          PLAN_OUTPUT: ${{ steps.tf-plan-string.outputs.summary }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const planOutput = process.env.PLAN_OUTPUT || 'No plan output available';
             const output = `## Terraform Plan Results 🏗️
 
             | Step | Status |
@@ -184,7 +187,7 @@ jobs:
             | Plan | \`${{ steps.plan.outcome }}\` |
             | Has Changes | \`${{ steps.plan.outputs.has_changes }}\` |
 
-            ${{ steps.tf-plan-string.outputs.summary }}
+            ${planOutput}
 
             ---
             *Pushed by: @${{ github.actor }}*
