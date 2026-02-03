@@ -1,0 +1,23 @@
+#Azure Container Registry
+AVD-KSV-0032
+
+#Google Container Registry
+AVD-KSV-0033
+
+#Private/internal registry
+AVD-KSV-0034
+
+#AWS Elastic Container Registry
+AVD-KSV-0035
+
+#Trusted registry
+AVD-KSV-0125
+
+#Secret expiry
+AVD-AZU-0017
+
+#Network ACL deny
+AVD-AZU-0013
+
+#Purge protection
+AVD-AZU-0016
