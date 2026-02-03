@@ -177,7 +177,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const planOutput = process.env.PLAN_OUTPUT || 'No plan output available';
-            const output = `## Terraform Plan Results 🏗️
+            const output = `## Terraform Plan Results
 
             | Step | Status |
             |------|--------|
