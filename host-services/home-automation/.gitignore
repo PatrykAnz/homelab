@@ -1,0 +1,7 @@
+# Runtime state — bind-mounted into HA (DB + backups)
+homeassistant/
+
+# Secrets
+secrets/*
+!secrets/*.example
+
