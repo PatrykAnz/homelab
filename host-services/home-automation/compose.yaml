@@ -6,7 +6,7 @@ secrets:
 
 services:
   mosquitto:
-    image: eclipse-mosquitto:2.0.21 
+    image: eclipse-mosquitto:2.0.21
     restart: unless-stopped
     # Host-network HA reaches the broker via 127.0.0.1:1884 (keep this mapping); container services use mosquitto:1883.
     ports:
@@ -31,7 +31,7 @@ services:
       start_period: 10s
 
   zigbee2mqtt:
-    image: koenkk/zigbee2mqtt:2.7.1  
+    image: koenkk/zigbee2mqtt:2.7.1
     restart: unless-stopped
     depends_on:
       mosquitto:

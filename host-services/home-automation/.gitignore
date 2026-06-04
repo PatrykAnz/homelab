@@ -4,4 +4,3 @@ homeassistant/
 # Secrets
 secrets/*
 !secrets/*.example
-
