@@ -18,14 +18,6 @@ Required secrets in Azure Key Vault:
 
 | Secret                    | Description                  |
 | ------------------------- | ---------------------------- |
-| `daylog-db-username`      | PostgreSQL database username |
-| `daylog-db-password`      | PostgreSQL database password |
-| `daylog-pgadmin-email`    | pgAdmin login email          |
-| `daylog-pgadmin-password` | pgAdmin login password       |
-| `garmin-email`            | Garmin Connect email         |
-| `garmin-password`         | Garmin Connect password      |
-| `withings-client-id`      | Withings API client ID       |
-| `withings-client-secret`  | Withings API client secret   |
 | `grafana-admin-user`      | Grafana admin username       |
 | `grafana-admin-password`  | Grafana admin password       |
 

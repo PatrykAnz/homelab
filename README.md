@@ -16,7 +16,6 @@ Personal Kubernetes homelab running on K3s with GitOps.
 
 **Networking:** Tailscale
 
-**Database:** PostgreSQL 18 (CloudNativePG, 3-node HA)
 **Home Automation:** Mosquitto, Zigbee2MQTT, Home Assistant (Docker on host)
 
 See [SETUP.md](SETUP.md) for prerequisites and bootstrap instructions.
@@ -31,8 +30,6 @@ PR-driven Terraform workflows via GitHub Actions with OIDC (no stored credential
 
 ## Services
 
-**DayLog:** Garmin + Withings sync (CronJobs, daily 02:00)
-**Database:** PostgreSQL 18 (CloudNativePG, 3 replicas)
 **Home Automation:** Mosquitto (MQTT), Zigbee2MQTT, Home Assistant (Docker on host)
 
 ## Access
@@ -42,8 +39,6 @@ All services via Tailscale:
 | Service        | Port    |
 | -------------- | ------- |
 | ArgoCD         | `30443` |
-| pgAdmin        | `30091` |
-| PostgreSQL     | `5432`  |
 | MQTT           | `1884`  |
 | Zigbee2MQTT    | `8080`  |
 | Home Assistant | `8123`  |
