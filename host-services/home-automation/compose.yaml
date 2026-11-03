@@ -6,11 +6,11 @@ secrets:
 
 services:
   mosquitto:
-    image: eclipse-mosquitto:2.0.21
+    image: eclipse-mosquitto:2.0.22
     restart: unless-stopped
     # Host-network HA reaches the broker via 127.0.0.1:1884 (keep this mapping); container services use mosquitto:1883.
     ports:
-      - "1884:1883"
+      - "127.0.0.1:1884:1883"
     environment:
       - TZ=Europe/Warsaw
       - MQTT_USER=${MQTT_USER}
@@ -31,13 +31,13 @@ services:
       start_period: 10s
 
   zigbee2mqtt:
-    image: koenkk/zigbee2mqtt:2.7.1
+    image: koenkk/zigbee2mqtt:2.14.3
     restart: unless-stopped
     depends_on:
       mosquitto:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       - TZ=Europe/Warsaw
       - ZIGBEE2MQTT_DATA=/app/data
@@ -62,12 +62,15 @@ services:
       start_period: 30s
 
   homeassistant:
-    image: ghcr.io/home-assistant/home-assistant:2026.6.0
+    image: ghcr.io/home-assistant/home-assistant:2026.10.4
     restart: unless-stopped
     depends_on:
       mosquitto:
         condition: service_healthy
     network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     environment:
       - TZ=Europe/Warsaw
     volumes:
