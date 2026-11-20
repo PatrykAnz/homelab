@@ -33,7 +33,7 @@ repos:
 
       - id: terraform_validate
         name: terraform validate
-        entry: terraform validate
+        entry: terraform -chdir=infra/terraform validate
         language: system
         files: \.tf$
         exclude: \.terraform/
