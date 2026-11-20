@@ -18,4 +18,10 @@ resource "azuread_service_principal_password" "sp_password" {
   rotate_when_changed = {
     rotation = time_rotating.sp_password_rotation.id
   }
+
+  # Replacement would otherwise revoke the old password before the new one exists. The cluster's
+  # azure-creds Secret still holds the old value until updated by hand (see SETUP.md).
+  lifecycle {
+    create_before_destroy = true
+  }
 }

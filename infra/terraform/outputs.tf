@@ -37,3 +37,13 @@ output "azure_key_vault_name" {
   value       = var.key_vault_name
   description = "Key Vault name (AZURE_KEY_VAULT_NAME)"
 }
+
+output "external_secrets_password_rotation_due" {
+  value       = module.external_secrets_sp.password_rotation_due
+  description = "Next apply after this date rotates the ESO password; update azure-creds right after (SETUP.md)."
+}
+
+output "external_secrets_password_expires" {
+  value       = module.external_secrets_sp.password_expires
+  description = "ESO stops authenticating after this date unless rotated and azure-creds updated."
+}

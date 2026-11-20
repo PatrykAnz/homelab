@@ -55,15 +55,9 @@ module "github_federated_credential" {
   issuer_url                = local.github_issuer_url
 }
 
-module "github_federated_credential-pr" {
-  source                    = "./modules/azure_federated_identity_credential"
-  name                      = "${var.github_organization_target}-${var.github_repository}-pr"
-  resource_group_name       = var.resource_group_name
-  user_assigned_identity_id = module.user_assigned_identity.user_assinged_identity_id
-  subject                   = "repo:${var.github_organization_target}/${var.github_repository}:pull_request"
-  audience_name             = local.default_audience_name
-  issuer_url                = local.github_issuer_url
-}
+# No pull_request federated credential: this identity is subscription Owner, and any PR job
+# could request its token. PRs run validate-only; plan/apply need the protected
+# environment. A read-only PR plan would need its own Reader-scoped identity.
 
 module "tfstate_role_assignment" {
   source         = "./modules/azure_role_assignment"

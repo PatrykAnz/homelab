@@ -40,6 +40,9 @@ jobs:
   apply:
     name: Apply
     runs-on: ubuntu-latest
+    # OIDC subject repo:<org>/<repo>:environment:production must match the federated credential
+    # (var.environment == TF_ENVIRONMENT). Protection rules on this environment gate the job.
+    environment: production
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
@@ -105,14 +108,14 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          path: ${{ inputs.working_directory }}
-
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: |
+          if terraform apply -auto-approve -input=false -no-color > "$RUNNER_TEMP/terraform-apply.log" 2>&1; then
+            echo "Terraform apply succeeded."
+          else
+            echo "::error::Terraform apply failed; details are suppressed because this repository is public."
+            exit 1
+          fi
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

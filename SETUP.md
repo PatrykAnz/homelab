@@ -16,10 +16,10 @@
 
 Required secrets in Azure Key Vault:
 
-| Secret                    | Description                  |
-| ------------------------- | ---------------------------- |
-| `grafana-admin-user`      | Grafana admin username       |
-| `grafana-admin-password`  | Grafana admin password       |
+| Secret                   | Description            |
+| ------------------------ | ---------------------- |
+| `grafana-admin-user`     | Grafana admin username |
+| `grafana-admin-password` | Grafana admin password |
 
 ## Bootstrap
 
@@ -40,6 +40,27 @@ platform/external-secrets/clustersecretstore-azure-key-vault.yaml.example -> pla
 kubectl apply -f platform/external-secrets/clustersecretstore-azure-key-vault.yaml
 ```
 
+The store authenticates with the Kubernetes Secret `external-secrets/azure-creds`. ESO cannot
+fetch this from Key Vault (it is the key to Key Vault), so it is created by hand. Recreate it the
+same way on a fresh cluster or restore, and after every password rotation:
+
+```bash
+KV=<key-vault-name>
+kubectl -n external-secrets create secret generic azure-creds \
+  --from-literal=ClientID="$(az keyvault secret show --vault-name "$KV" -n azure-client-id --query value -o tsv)" \
+  --from-literal=ClientSecret="$(az keyvault secret show --vault-name "$KV" -n azure-client-secret --query value -o tsv)" \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl get clustersecretstore azure-key-vault-store   # STATUS must be Valid / READY True
+```
+
+### Password rotation
+
+- Terraform rotates the ESO password only when an apply runs after
+  `terraform output external_secrets_password_rotation_due`. The old password is revoked in that
+  same apply, so update `azure-creds` (above) immediately after it.
+- `terraform output external_secrets_password_expires` is the hard deadline. Put a calendar
+  reminder a month before `rotation_due` and run plan/apply then, not on the expiry day.
+
 ## Terraform Setup
 
 Remove .example from files and edit values:
@@ -56,6 +77,10 @@ terraform apply
 ```
 
 ## CI/CD Setup
+
+The public workflow reports only whether the plan has changes. It does not publish plan output or
+upload plan artifacts; apply creates a fresh plan after environment approval. For diagnostics, run
+Terraform locally with the required credentials.
 
 Configure these GitHub repository secrets:
 

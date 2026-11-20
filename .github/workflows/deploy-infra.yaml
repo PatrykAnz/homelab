@@ -17,15 +17,37 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  pull-requests: write
 
 jobs:
   # ============================================
-  # PLAN - Runs on PRs and pushes to main
+  # Validate pull requests without Azure credentials.
+  # ============================================
+  terraform-validate:
+    name: Terraform Validate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate -no-color
+
+  # ============================================
+  # Plan runs only on main in the protected environment.
   # ============================================
   terraform-plan:
     name: Terraform Plan
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/terraform-plan.yaml
     with:
       working_directory: infra/terraform
@@ -44,25 +66,16 @@ jobs:
       TF_ENVIRONMENT: ${{ secrets.TF_ENVIRONMENT }}
 
   # ============================================
-  # APPROVAL - Manual gate before apply
-  # ============================================
-  approve-apply:
-    name: Approve Apply
-    needs: terraform-plan
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.terraform-plan.outputs.has_changes == 'true'
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Approval Gate
-        run: echo "Apply approved for production"
-
-  # ============================================
-  # APPLY - Only runs after manual approval
+  # The apply job itself waits for production environment approval;
+  # a separate approval job would not pass its environment identity on.
   # ============================================
   terraform-apply:
     name: Terraform Apply
-    needs: [terraform-plan, approve-apply]
+    needs: terraform-plan
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.terraform-plan.outputs.has_changes == 'true'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/terraform-apply.yaml
     with:
       working_directory: infra/terraform
