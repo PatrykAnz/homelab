@@ -33,8 +33,6 @@ on:
         required: true
       TF_GITHUB_REPO:
         required: true
-      TF_ENVIRONMENT:
-        required: true
 
 env:
   ARM_USE_OIDC: true
@@ -43,9 +41,10 @@ env:
 jobs:
   plan:
     name: Plan
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # OIDC subject repo:<org>/<repo>:environment:production must match the federated credential
-    # (var.environment == TF_ENVIRONMENT). Protection rules on this environment gate the job.
+    # OIDC subject repo:<org>/<repo>:environment:production must match the federated credential.
+    # The GitHub environment policy restricts this job to main.
     environment: production
     outputs:
       has_changes: ${{ steps.plan.outputs.has_changes }}
@@ -55,17 +54,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Azure Login via OIDC
-        uses: azure/login@v2
+        uses: azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: "~> 1.5"
           terraform_wrapper: false
@@ -84,16 +83,15 @@ jobs:
           tenant_id                        = "${{ secrets.AZURE_TENANT_ID }}"
           subscription_id                  = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           key_vault_name                   = "${{ secrets.AZURE_KEY_VAULT_NAME }}"
-          storage_account_id               = "${{ secrets.AZURE_STORAGE_ACCOUNT }}"
+          storage_account_name             = "${{ secrets.AZURE_STORAGE_ACCOUNT }}"
           storage_account_tier             = "Standard"
           storage_account_replication_type = "LRS"
           tfstate_container_name           = "${{ secrets.AZURE_TFSTATE_CONTAINER }}"
           user_assigned_identity_name      = "${{ secrets.TF_USER_ASSIGNED_IDENTITY_NAME }}"
-          role_name                        = "Owner"
           principal_type                   = "ServicePrincipal"
           github_organization_target       = "${{ secrets.TF_GITHUB_ORG }}"
           github_repository                = "${{ secrets.TF_GITHUB_REPO }}"
-          environment                      = "${{ secrets.TF_ENVIRONMENT }}"
+          environment                      = "production"
           EOF
 
           terraform fmt terraform.tf terraform.tfvars

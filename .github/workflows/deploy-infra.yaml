@@ -30,8 +30,8 @@ jobs:
       run:
         working-directory: infra/terraform
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: "~> 1.5"
           terraform_wrapper: false
@@ -44,7 +44,7 @@ jobs:
   # ============================================
   terraform-plan:
     name: Terraform Plan
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       id-token: write
@@ -63,7 +63,6 @@ jobs:
       TF_USER_ASSIGNED_IDENTITY_NAME: ${{ secrets.TF_USER_ASSIGNED_IDENTITY_NAME }}
       TF_GITHUB_ORG: ${{ secrets.TF_GITHUB_ORG }}
       TF_GITHUB_REPO: ${{ secrets.TF_GITHUB_REPO }}
-      TF_ENVIRONMENT: ${{ secrets.TF_ENVIRONMENT }}
 
   # ============================================
   # The apply job itself waits for production environment approval;
@@ -91,4 +90,3 @@ jobs:
       TF_USER_ASSIGNED_IDENTITY_NAME: ${{ secrets.TF_USER_ASSIGNED_IDENTITY_NAME }}
       TF_GITHUB_ORG: ${{ secrets.TF_GITHUB_ORG }}
       TF_GITHUB_REPO: ${{ secrets.TF_GITHUB_REPO }}
-      TF_ENVIRONMENT: ${{ secrets.TF_ENVIRONMENT }}
