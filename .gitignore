@@ -16,3 +16,24 @@ crash.log
 terraform.tfvars
 terraform.tf
 tfplan.json
+
+# Local-only operational data; never commit.
+/private/
+# Health data (log.csv etc.) and its backups stay local
+*.csv
+*.csv.*
+__pycache__/
+
+# Local backups and sensitive exports
+/backup-*/
+/backups/
+/offsite/
+/dailyquest-backups/
+*.age
+*.dump
+*.sql
+*.sql.gz
+*.tar
+*.tgz
+*.zip
+*.log
