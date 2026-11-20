@@ -5,4 +5,5 @@ resource "azurerm_key_vault" "key_vault" {
   tenant_id                  = var.tenant_id
   sku_name                   = var.sku_name
   rbac_authorization_enabled = var.enable_rbac_authorization
+  purge_protection_enabled   = true
 }

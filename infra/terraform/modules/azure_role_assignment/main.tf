@@ -3,4 +3,8 @@ resource "azurerm_role_assignment" "role" {
   principal_type       = var.principal_type
   role_definition_name = var.role_name
   scope                = var.scope_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

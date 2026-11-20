@@ -25,7 +25,7 @@ variable "key_vault_name" {
   description = "Key Vault name."
 }
 
-variable "storage_account_id" {
+variable "storage_account_name" {
   type        = string
   description = "Storage account name."
 }
@@ -50,11 +50,6 @@ variable "tfstate_container_name" {
 variable "user_assigned_identity_name" {
   type        = string
   description = "User assigned identity name."
-}
-
-variable "role_name" {
-  type        = string
-  description = "Role name."
 }
 
 variable "principal_type" {

@@ -6,6 +6,8 @@ resource "azurerm_storage_account" "storage_account" {
   account_replication_type        = var.account_replication_type
   min_tls_version                 = var.min_tls_version
   allow_nested_items_to_be_public = var.allow_nested_items_to_be_public
+  shared_access_key_enabled       = false
+  https_traffic_only_enabled      = true
 }
 
 resource "azurerm_storage_container" "tfstate" {

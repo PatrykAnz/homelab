@@ -7,7 +7,7 @@ subscription_id     = "<subscription-id>"                  #TODO: Replace with t
 key_vault_name = "<key-vault-name>"                        #TODO: Replace with the name of the Key Vault
 
 # Storage Account
-storage_account_id               = "<storage-account-name>" #TODO: Replace with globally unique name (lowercase, no hyphens)
+storage_account_name             = "<storage-account-name>" #TODO: Replace with globally unique name (lowercase, no hyphens)
 storage_account_tier             = "<storage-account-tier>"               #TODO: Replace with the tier of the storage account
 storage_account_replication_type = "<storage-account-replication-type>"                    #TODO: Replace with the replication type of the storage account
 
@@ -17,14 +17,12 @@ tfstate_container_name = "<container-name>"              #TODO: Replace with the
 # User Assigned Identity
 user_assigned_identity_name = "<user-assigned-identity-name>" #TODO: Replace with the name of the user assigned identity
 
-#Role Assignment
-role_name      = "<role-name>"                          #TODO: Replace with the name of the role to assign to the principal
 principal_type = "<principal-type>"                     #TODO: Replace with the type of the principal to assign the role to
 
 # GitHub
 github_organization_target = "<github-organization-target>" #TODO: Replace with the GitHub organization target
 github_repository          = "<github-repository>"          #TODO: Replace with the GitHub repository
-environment                = "<environment>"                #TODO: Replace with the environment
+environment                = "production"
 
 # External Secrets Operator
 external_secrets_sp_name = "<external-secrets-sp-name>"     #TODO: Replace with the name of the external secrets service principal

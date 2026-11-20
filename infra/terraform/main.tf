@@ -4,7 +4,6 @@ locals {
 }
 
 data "azurerm_client_config" "current" {}
-data "azurerm_subscription" "current" {}
 
 resource "azurerm_resource_group" "resource_group" {
   name     = var.resource_group_name
@@ -21,7 +20,7 @@ module "keyvault" {
 
 module "storageaccount" {
   source                          = "./modules/azure_storage_account"
-  name                            = var.storage_account_id
+  name                            = var.storage_account_name
   location                        = var.location
   resource_group_name             = var.resource_group_name
   account_tier                    = var.storage_account_tier
@@ -37,11 +36,26 @@ module "user_assigned_identity" {
   resource_group_name = var.resource_group_name
 }
 
-module "subscription_owner_role_assignment" {
+module "resource_group_contributor_role_assignment" {
   source         = "./modules/azure_role_assignment"
   principal_id   = module.user_assigned_identity.user_assinged_identity_principal_id
-  role_name      = var.role_name
-  scope_id       = data.azurerm_subscription.current.id
+  role_name      = "Contributor"
+  scope_id       = azurerm_resource_group.resource_group.id
+  principal_type = var.principal_type
+
+  depends_on = [module.resource_group_rbac_admin_role_assignment]
+}
+
+moved {
+  from = module.subscription_owner_role_assignment
+  to   = module.resource_group_contributor_role_assignment
+}
+
+module "resource_group_rbac_admin_role_assignment" {
+  source         = "./modules/azure_role_assignment"
+  principal_id   = module.user_assigned_identity.user_assinged_identity_principal_id
+  role_name      = "User Access Administrator"
+  scope_id       = azurerm_resource_group.resource_group.id
   principal_type = var.principal_type
 }
 
@@ -55,16 +69,16 @@ module "github_federated_credential" {
   issuer_url                = local.github_issuer_url
 }
 
-# No pull_request federated credential: this identity is subscription Owner, and any PR job
-# could request its token. PRs run validate-only; plan/apply need the protected
-# environment. A read-only PR plan would need its own Reader-scoped identity.
+# Pull requests run validation only. The deployment identity is limited to this
+# resource group and the federated credential trusts only the protected environment.
 
 module "tfstate_role_assignment" {
   source         = "./modules/azure_role_assignment"
   principal_id   = module.user_assigned_identity.user_assinged_identity_principal_id
   principal_type = var.principal_type
   role_name      = "Storage Blob Data Contributor"
-  scope_id       = module.storageaccount.id
+  # This storage account is dedicated to Terraform state.
+  scope_id = module.storageaccount.id
 }
 
 # External Secrets Operator Service Principal
