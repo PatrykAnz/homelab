@@ -67,6 +67,15 @@ Remove .example from files and edit values:
 terraform.tfvars.example -> terraform.tfvars
 terraform.tf.example -> terraform.tf
 
+For local Terraform runs, sign in with `az login` first. The backend uses Microsoft Entra ID;
+GitHub Actions uses OIDC. The first apply must be run by an Azure identity allowed to manage the
+resource group and its role assignments. The GitHub identity is limited to Contributor and User
+Access Administrator at that resource-group scope; it is not a subscription Owner.
+
+The GitHub `production` environment is restricted to `main` and requires an approval.
+Use a dedicated storage account for Terraform state; its containers are private and shared-key
+authentication is disabled.
+
 Run:
 
 ```bash
@@ -79,8 +88,9 @@ terraform apply
 ## CI/CD Setup
 
 The public workflow reports only whether the plan has changes. It does not publish plan output or
-upload plan artifacts; apply creates a fresh plan after environment approval. For diagnostics, run
-Terraform locally with the required credentials.
+upload plan artifacts; apply creates a fresh plan after environment approval. Review the
+infrastructure change locally before merging; the apply job does not apply the previously displayed
+plan because its details are intentionally not public.
 
 Configure these GitHub repository secrets:
 
@@ -97,7 +107,6 @@ Configure these GitHub repository secrets:
 | `TF_USER_ASSIGNED_IDENTITY_NAME` | Identity name                      |
 | `TF_GITHUB_ORG`                  | GitHub organization/user           |
 | `TF_GITHUB_REPO`                 | Repository name                    |
-| `TF_ENVIRONMENT`                 | Environment name (e.g., `dev`)     |
 
 ## Home Automation Setup
 
@@ -109,9 +118,26 @@ Create Mosquitto password file:
 ```bash
 cd host-services/home-automation
 source .env
-docker run --rm -v "$(pwd):/out" eclipse-mosquitto:2 \
-  sh -c "mosquitto_passwd -c -b /out/passwd '$MQTT_USER' '$MQTT_PASSWORD'"
+mkdir -p secrets
+(
+  umask 077
+  read -rsp "MQTT password: " MQTT_PASSWORD || {
+    printf '\nFailed to read MQTT password.\n' >&2
+    exit 1
+  }
+  printf '\n'
+  if [ -z "$MQTT_PASSWORD" ]; then
+    printf 'MQTT password must not be empty.\n' >&2
+    exit 1
+  fi
+  printf '%s' "$MQTT_PASSWORD" > secrets/mqtt_password
+)
+docker run --rm -it -v "$(pwd):/out" eclipse-mosquitto:2 \
+  mosquitto_passwd -c /out/passwd "$MQTT_USER"
 ```
+
+The first prompt creates the local-only Compose secret; the second sets the broker password hash.
+Use the same password both times. Neither command places it in process arguments.
 
 Start stack:
 
